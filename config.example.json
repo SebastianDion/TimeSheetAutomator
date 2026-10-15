@@ -1,0 +1,38 @@
+{
+  "employee": {
+    "name": "YOUR_NAME",
+    "mii_id": "YOUR_MII_ID",
+    "signature_name": "YOUR_FULL_NAME_CAPS"
+  },
+  "client": {
+    "project_header": "PT (Persero) Tbk",
+    "unit_division": "_",
+    "site": "PT __ (PERSERO) Tbk."
+  },
+  "project_defaults": {
+    "project_name": "Project_Name",
+    "project_id": "Project_Id",
+    "aplikasi_terdampak": "App_Name",
+    "aip_fitur": "-",
+    "divisi": "Division",
+    "departement": "Department",
+    "sub_departement": "-"
+  },
+  "working_hours": {
+    "default_start": "08:00:00",
+    "default_end": "17:15:00",
+    "randomize_minutes": true,
+    "start_min_hour": 7,
+    "start_min_minute": 55,
+    "start_max_hour": 8,
+    "start_max_minute": 15,
+    "end_min_hour": 17,
+    "end_min_minute": 5,
+    "end_max_hour": 17,
+    "end_max_minute": 30
+  },
+  "supervisors": {
+    "checked_by": "NAMA_PEMERIKSA",
+    "approved_by": "NAMA_PENYETUJU"
+  }
+}

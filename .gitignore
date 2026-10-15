@@ -1,0 +1,43 @@
+# Python byte-code / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Output timesheet files (Personal / Client Excel documents)
+output/*
+!output/.gitkeep
+
+# Monthly input drafts & raw notes
+inputs/*
+!inputs/.gitkeep
+
+# Office attendance uploads / PDFs
+*.pdf
+
+# Temporary media extraction & test files
+extracted_media/
+test_logo.xlsx
+.scratch/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Private configuration (contains personal NIK, supervisor names, etc.)
+config.json
+

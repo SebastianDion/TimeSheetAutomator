@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timesheet Automator • BNI / MII</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Newsreader"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            tavern: {
+              bg: '#111614',
+              surface: '#17211D',
+              surfaceLighter: '#1C2722',
+              surfaceDim: '#0E1412',
+              border: '#26362F',
+              borderLight: '#35483F',
+              gold: '#E8B86B',
+              goldHover: '#F2C57E',
+              goldDim: '#B88B43',
+              goldBg: 'rgba(232, 184, 107, 0.12)',
+              ivory: '#F4EFE6',
+              muted: '#8E9F97',
+              dimmed: '#55665E'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #111614;
+      color: #F4EFE6;
+    }
+    /* Custom Tavern scrollbar */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #111614;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #26362F;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3B4F45;
+    }
+  </style>
+</head>
+<body class="bg-tavern-bg text-tavern-ivory font-sans antialiased min-h-screen flex flex-col selection:bg-tavern-gold selection:text-tavern-bg">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-tavern-surface/90 backdrop-blur-md border-b border-tavern-border sticky top-0 z-30 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-18 gap-4">
+        
+        <!-- Brand / App Title -->
+        <div class="flex items-center gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-tavern-surfaceLighter border border-tavern-gold/40 flex items-center justify-center text-tavern-gold text-base font-bold shadow-sm">
+            TS
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-serif font-bold text-lg text-tavern-ivory tracking-wide">Timesheet</span>
+              <span class="text-[10px] uppercase font-mono font-bold tracking-widest text-tavern-gold px-1.5 py-0.5 rounded bg-tavern-gold/10 border border-tavern-gold/30">
+                Automator
+              </span>
+            </div>
+            <p class="text-[11px] text-tavern-muted font-mono tracking-tight" id="profile-subtitle">BNI / MII Timesheet Automator • CPR (CR260028)</p>
+          </div>
+
+        </div>
+
+        <!-- Controls: Month & Year Selector & Actions -->
+        <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+          <div class="flex items-center bg-tavern-surfaceDim p-1 rounded-xl border border-tavern-border shadow-inner">
+            <select id="select-month" class="bg-tavern-surfaceLighter text-tavern-ivory text-xs font-semibold px-3 py-1.5 rounded-lg border border-tavern-border focus:ring-1 focus:ring-tavern-gold focus:outline-none cursor-pointer">
+              <option value="1">Januari</option>
+              <option value="2">Februari</option>
+              <option value="3">Maret</option>
+              <option value="4">April</option>
+              <option value="5">Mei</option>
+              <option value="6">Juni</option>
+              <option value="7">Juli</option>
+              <option value="8">Agustus</option>
+              <option value="9">September</option>
+              <option value="10" selected>Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
+            </select>
+            <select id="select-year" class="bg-transparent text-tavern-muted text-xs font-semibold px-2.5 py-1.5 border-0 focus:ring-0 cursor-pointer">
+              <option value="2025" class="bg-tavern-surface">2025</option>
+              <option value="2026" selected class="bg-tavern-surface">2026</option>
+              <option value="2027" class="bg-tavern-surface">2027</option>
+            </select>
+          </div>
+
+          <!-- Import Check In / Check Out Button -->
+          <input type="file" id="attendance-file-input" accept=".pdf" class="hidden" onchange="handleAttendanceUpload(event)">
+          <button onclick="document.getElementById('attendance-file-input').click()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-tavern-surfaceLighter hover:bg-tavern-border text-tavern-gold border border-tavern-gold/40 transition cursor-pointer shadow-xs" title="Ambil Jam Check In & Check Out dari file PDF absensi kantor">
+            <span>⏱️ Import Jam Absensi</span>
+          </button>
+
+          <!-- Quick Paste Modal Button -->
+          <button onclick="openBulkModal()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-tavern-surfaceLighter hover:bg-tavern-border text-tavern-ivory border border-tavern-border transition cursor-pointer" title="Paste list pekerjaan dari Jira/Notion">
+            <span>📋 Bulk Paste</span>
+          </button>
+
+          <!-- Save Draft Button -->
+          <button id="btn-save-draft" onclick="saveDraft()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-tavern-surfaceLighter hover:bg-tavern-border text-tavern-muted hover:text-tavern-ivory border border-tavern-border transition cursor-pointer">
+            <span>💾 Simpan</span>
+          </button>
+
+          <!-- Download Excel Button -->
+          <button id="btn-generate" onclick="generateExcel()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl bg-tavern-gold hover:bg-tavern-goldHover text-tavern-bg shadow-md shadow-tavern-gold/20 transition-all cursor-pointer font-sans">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Download Excel</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner with Tavern Aesthetic -->
+  <div class="border-b border-tavern-border/60 bg-gradient-to-b from-tavern-surface/40 to-transparent">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-tavern-gold font-mono text-[11px] tracking-wider uppercase">✦ BNI / MII VENDOR TIMESHEET • CPR (CR260028)</span>
+      </div>
+      <h2 class="font-serif text-3xl sm:text-4xl text-tavern-ivory font-bold tracking-tight leading-snug">
+        Otomasi Timesheet Bulanan.<br>
+        <span class="text-tavern-gold italic font-normal">Cepat, akurat, dan siap submit.</span>
+      </h2>
+      <p class="text-xs text-tavern-muted mt-2 max-w-xl font-sans">
+        Sistem otomasi timesheet Bank BNI / MII. Cukup masukkan kegiatan harian di bawah, biarkan sistem menghitung kalender, jam kerja natural, dan menghasilkan file Excel siap submit.
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1">
+
+    <!-- KPI Metric Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+      
+      <div class="bg-tavern-surface p-4 rounded-2xl border border-tavern-border shadow-sm flex items-center justify-between">
+        <div>
+          <div class="text-[10px] font-bold uppercase tracking-widest text-tavern-dimmed">Periode Aktif</div>
+          <div class="text-base font-serif font-bold text-tavern-ivory mt-0.5" id="stat-period">Oktober 2026</div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-tavern-surfaceLighter text-tavern-gold border border-tavern-border flex items-center justify-center font-bold">
+          📅
+        </div>
+      </div>
+
+      <div class="bg-tavern-surface p-4 rounded-2xl border border-tavern-border shadow-sm flex items-center justify-between">
+        <div>
+          <div class="text-[10px] font-bold uppercase tracking-widest text-tavern-dimmed">Hari Kerja Efektif</div>
+          <div class="text-base font-serif font-bold text-emerald-400 mt-0.5" id="stat-workdays">0 Hari</div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-emerald-950/40 text-emerald-400 border border-emerald-900/50 flex items-center justify-center font-bold">
+          💼
+        </div>
+      </div>
+
+      <div class="bg-tavern-surface p-4 rounded-2xl border border-tavern-border shadow-sm flex items-center justify-between">
+        <div>
+          <div class="text-[10px] font-bold uppercase tracking-widest text-tavern-dimmed">Kegiatan Terisi</div>
+          <div class="text-base font-serif font-bold text-tavern-gold mt-0.5" id="stat-filled">0 / 0 Hari</div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-tavern-gold/10 text-tavern-gold border border-tavern-gold/20 flex items-center justify-center font-bold">
+          ✍️
+        </div>
+      </div>
+
+      <div class="bg-tavern-surface p-4 rounded-2xl border border-tavern-border shadow-sm flex items-center justify-between">
+        <div>
+          <div class="text-[10px] font-bold uppercase tracking-widest text-tavern-dimmed">Weekend & Libur</div>
+          <div class="text-base font-serif font-bold text-tavern-muted mt-0.5" id="stat-holidays">0 Hari</div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-tavern-surfaceLighter text-tavern-muted border border-tavern-border flex items-center justify-center font-bold">
+          🏖️
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Table Container Card -->
+    <div class="bg-tavern-surface rounded-2xl border border-tavern-border shadow-xl overflow-hidden">
+      
+      <!-- Table Action Header -->
+      <div class="px-5 py-4 border-b border-tavern-border bg-tavern-surfaceLighter/40 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 class="text-sm font-bold text-tavern-ivory flex items-center gap-2">
+            <span>Daftar Log Aktivitas Harian</span>
+            <span class="text-[10px] font-mono text-tavern-gold bg-tavern-gold/10 px-2 py-0.5 rounded border border-tavern-gold/30">Auto-Calculate</span>
+          </h3>
+          <p class="text-xs text-tavern-muted mt-0.5">Ketik pekerjaan yang Anda selesaikan. Jam kerja default (~08:00 - 17:15) dan status 'P' langsung terisi otomatis.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="fillRealisticHours()" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-tavern-surfaceLighter hover:bg-tavern-border text-tavern-gold border border-tavern-gold/30 transition flex items-center gap-1.5 cursor-pointer" title="Acak menit masuk dan pulang secara natural">
+            <span>✨ Acak Jam Masuk/Pulang</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="overflow-x-auto max-h-[calc(100vh-340px)] overflow-y-auto">
+        <table class="w-full text-left border-collapse">
+          <thead class="sticky top-0 bg-tavern-surfaceLighter/95 backdrop-blur-md z-10 text-tavern-gold text-[11px] uppercase font-mono font-bold tracking-wider border-b border-tavern-border">
+            <tr>
+              <th class="py-3 px-4 w-40">Tanggal & Hari</th>
+              <th class="py-3 px-3 w-36">Status Kehadiran</th>
+              <th class="py-3 px-3 w-40">Jam (Start - End)</th>
+              <th class="py-3 px-5">Aktivitas / Remark Pekerjaan</th>
+            </tr>
+          </thead>
+          <tbody id="days-table-body" class="divide-y divide-tavern-border/50 text-xs">
+            <!-- Dynamic rows will be rendered here by script.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Footer Indicator -->
+      <div class="px-5 py-3 bg-tavern-surfaceDim border-t border-tavern-border flex flex-wrap items-center justify-between text-xs text-tavern-muted gap-2">
+        <div class="flex items-center gap-4">
+          <span class="inline-flex items-center gap-1.5 font-medium">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Hari Kerja
+          </span>
+          <span class="inline-flex items-center gap-1.5 font-medium">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#8E9F97]"></span> Weekend / Libur Nasional (Abu-abu)
+          </span>
+        </div>
+        <div class="font-mono text-[11px] text-tavern-dimmed">
+          Format Dokumen Acuan BNI / MII • Proyek CPR (CR260028)
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Bulk Paste Modal -->
+  <div id="bulk-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-tavern-surface rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-tavern-border">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-tavern-gold/15 text-tavern-gold border border-tavern-gold/30 flex items-center justify-center font-bold">📋</div>
+          <h3 class="text-sm font-bold text-tavern-ivory">Bulk Paste Kegiatan</h3>
+        </div>
+        <button onclick="closeBulkModal()" class="text-tavern-muted hover:text-tavern-ivory text-xl">&times;</button>
+      </div>
+
+      <p class="text-xs text-tavern-muted mb-3">
+        Paste daftar catatan kegiatan Anda di sini (satu baris per hari kerja). Sistem akan langsung memetakan baris per baris ke hari kerja yang aktif:
+      </p>
+
+      <textarea id="bulk-text" rows="8" placeholder="Baris 1: Slicing UI kalkulasi simulasi
+Baris 2: Testing API swagger dan unit test
+Baris 3: Resolve duplicate code SonarQube..." class="w-full text-xs font-mono p-3 bg-tavern-surfaceDim text-tavern-ivory border border-tavern-border rounded-xl focus:border-tavern-gold focus:ring-1 focus:ring-tavern-gold focus:outline-none"></textarea>
+
+      <div class="flex items-center justify-end gap-2 mt-4">
+        <button onclick="closeBulkModal()" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-tavern-muted hover:bg-tavern-surfaceLighter">Batal</button>
+        <button onclick="applyBulkPaste()" class="px-4 py-1.5 text-xs font-bold rounded-lg bg-tavern-gold hover:bg-tavern-goldHover text-tavern-bg shadow-sm">Terapkan ke Tabel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden fixed bottom-6 right-6 z-50 bg-tavern-surface text-tavern-ivory px-4 py-3 rounded-xl shadow-2xl text-xs font-medium flex items-center gap-2.5 border border-tavern-gold/50 transition-all">
+    <span id="toast-icon">✅</span>
+    <span id="toast-msg">Operasi berhasil dilakukan!</span>
+  </div>
+
+  <!-- Connect External Script.js -->
+  <script src="/script.js"></script>
+</body>
+</html>
