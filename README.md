@@ -1,6 +1,6 @@
-# BNI / MII Excel Timesheet Automator
+#Timesheet Automator
 
-Aplikasi otomatisasi pembuatan timesheet bulanan format resmi PT Bank Negara Indonesia (Persero) Tbk / PT Mitra Integrasi Informatika (MII) untuk proyek CPR (CR260028).
+Aplikasi otomatisasi pembuatan timesheet bulanan format resmi.
 
 Dibuat khusus agar **Anda tidak perlu lagi membuat sheet Excel baru secara manual setiap bulan**. Cukup input catatan kegiatan harian Anda, dan seluruh dokumen Excel (tanggal kalender, penyesuaian akhir pekan & tanggal merah, kalkulasi total jam kerja, status absensi, metadata proyek, rekap total, serta blok tanda tangan) akan dibuat otomatis dengan format yang 100% presisi.
 
